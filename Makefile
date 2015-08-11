@@ -1,6 +1,9 @@
+all: dewtest test
+
 dewtest: dewtest.c dewtest.h
-	ctags -R *
-	gcc -std=gnu99 -Wall dewtest.c -o dewtest
+	gcc -Wall dewtest.c -o dewtest
+
+test: dewtest
 	./dewtest
 
 clean:
