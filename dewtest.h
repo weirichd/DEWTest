@@ -26,21 +26,32 @@
 #define __DEWTEST__INCLUDED__
 
 #include <stdio.h>
-#include <stdint.h>
 
-typedef int32_t __DEWTEST__BOOL__32__;
+/*********************
+ *  Color Defines
+ *********************/
 
-inline void __DEWTEST__ASSERT__TEST__(__DEWTEST__BOOL__32__ thing_we_are_testing)
+#define __DEWTEST__RED(text) "\e[31m"#text"\e[0m"
+#define __DEWTEST__GREEN(text) "\e[32m"#text"\e[0m"
+
+
+
+static inline void __DEWTEST__ASSERT__TEST__(int thing_we_are_testing,
+                                             char *file,
+                                             int line)
 {
+	printf("FILE: %s  LINE: %d\t", file, line);
+
 	if(thing_we_are_testing)
 	{
-		printf("Test Passed\n");
+		printf(__DEWTEST__GREEN(Test Passed)"\n");
 	}
 	else
 	{
-		printf("Test Failed\n");
+		printf(__DEWTEST__RED(Test Failed)"\n");
 	}
 }
 
+#define DEW_assert_true(a) __DEWTEST__ASSERT__TEST__(a, __FILE__, __LINE__)
 
-#endif /* __DEWTEST__INCLUDED__ */
+#endif  /* __DEWTEST__INCLUDED__ */
