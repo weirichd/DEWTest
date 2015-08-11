@@ -31,8 +31,8 @@
  *  Color Defines
  *********************/
 
-#define __DEWTEST__RED(text) "\e[31m"#text"\e[0m"
-#define __DEWTEST__GREEN(text) "\e[32m"#text"\e[0m"
+#define __DEWTEST__RED(text) "\e[41m"#text"\e[0m"
+#define __DEWTEST__GREEN(text) "\e[42m"#text"\e[0m"
 
 
 
@@ -52,6 +52,7 @@ static inline void __DEWTEST__ASSERT__TEST__(int thing_we_are_testing,
 	}
 }
 
-#define DEW_assert_true(a) __DEWTEST__ASSERT__TEST__(a, __FILE__, __LINE__)
+#define DEW_assert_true(true_thing) __DEWTEST__ASSERT__TEST__(true_thing, __FILE__, __LINE__)
+#define DEW_assert_false(false_thing) __DEWTEST__ASSERT__TEST__(!false_thing, __FILE__, __LINE__)
 
 #endif  /* __DEWTEST__INCLUDED__ */
