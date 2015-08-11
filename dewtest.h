@@ -19,9 +19,7 @@
  */
 
 /*
- * About This File
- * 
- * DEWTest is a very small testing library for C.  It is only required that this header file
+ * DEWTest is a _very_ small testing library for C.  It is only required that this header file
  * be included. Access to the standard C library is required.
  *
  * Note: This has only been tested with gcc.
@@ -31,6 +29,7 @@
 #define __DEWTEST_INCLUDED
 
 #include <stdio.h> // for printf
+#include <ctype.h> // for isspace
 
 /*******************
  *  Color Defines
@@ -66,7 +65,21 @@
 #define __DEWTEST_READ_SUCCESS 1
 #define __DEWTEST_READ_FAIL 0
 
-static inline int __DEWTest_Print_Source_Line(char *filename, int line_number)
+static char *__DEWTest_Remove_Leading_Whitespaces(char *string)
+{
+	char *string_without_whitespaces = string;
+
+	while(string_without_whitespaces
+		&& *string_without_whitespaces != '\0'
+		&& isspace(*string_without_whitespaces))
+	{
+		++string_without_whitespaces;
+	}
+
+	return string_without_whitespaces;
+}
+
+static int __DEWTest_Print_Source_Line(char *filename, int line_number)
 {
 	FILE *fh = fopen(filename, "r");
 	if(!fh)
@@ -84,31 +97,38 @@ static inline int __DEWTest_Print_Source_Line(char *filename, int line_number)
 
 	fclose(fh);
 
-	printf("%s:%d:1: %s", filename, line_number, buffer);
+	printf("%s:%d:1: %s", filename, line_number, __DEWTest_Remove_Leading_Whitespaces(buffer));
 
 	return __DEWTEST_READ_SUCCESS;
-}
-
-static inline char *___DEWTest_Remove_Leading_Whitespaces(char *string)
-{
-	char *string_without_whitespaces = string;
-
-	return string_without_whitespaces;
 }
 
 /*******************
  *  Assert Macros
  *******************/
 
+#ifndef DEWTEST_OFF
+
 #define DEW_assert_true(true_thing) \
 	__DEWTest_Assert(true_thing, __FILE__, __LINE__, \
-	"Expected True, but recieved '"#true_thing"'")
+	"Expected true, but recieved '"#true_thing"'")
 #define DEW_assert_false(false_thing) \
 	__DEWTest_Assert(!false_thing, __FILE__, __LINE__, \
-	"Expected False, but recieved '"#false_thing"'")
+	"Expected false, but recieved '"#false_thing"'")
 #define DEW_assert_equal(equal_thing1, equal_thing2) \
 	__DEWTest_Assert(equal_thing1 == equal_thing2, __FILE__, __LINE__, \
 	"Expected that '"#equal_thing1" == "#equal_thing2"'");				
+
+#define DEW_assert_not_equal(not_equal_thing1, not_equal_thing2) \
+	__DEWTest_Assert(not_equal_thing1 != not_equal_thing2, __FILE__, __LINE__, \
+	"Expected that '"#not_equal_thing1" != "#not_equal_thing2"'");				
+#else
+
+#define DEW_assert_true(true_thing) 
+#define DEW_assert_false(false_thing) 
+#define DEW_assert_equal(equal_thing1, equal_thing2) 
+#define DEW_assert_not_equal(not_equal_thing1, not_equal_thing2) 
+
+#endif /* DEWTEST_OFF */
 
 /*********************
  *  Assert Function
@@ -117,7 +137,7 @@ static inline char *___DEWTest_Remove_Leading_Whitespaces(char *string)
 static int __dewtest_passed_tests = 0;
 static int __dewtest_total_tests = 0;
 
-static inline void __DEWTest_Assert(int thing_to_be_tested,
+static void __DEWTest_Assert(int thing_to_be_tested,
 					char *filename,
 					int line, 
 					char *fail_message)
@@ -129,7 +149,7 @@ static inline void __DEWTest_Assert(int thing_to_be_tested,
 
 	__dewtest_total_tests++;
 
-	printf("Test %-4d Line: %4d " , __dewtest_total_tests, line);
+	printf("Test %-4d Line %-4d " , __dewtest_total_tests, line);
 
 	if(thing_to_be_tested)
 	{
@@ -154,14 +174,17 @@ static inline void __DEWTest_Assert(int thing_to_be_tested,
  * Report Results
  *******************/
 
-// This only works in GCC.  If you are using something else this will (probably) cause an error
-void DEWTest_Report_Results() __attribute__ ((destructor));
+#ifndef DEWTEST_OFF
 
-void DEWTest_Report_Results()
+// This only works in GCC.  If you are using something else this will (probably) cause an error
+static void DEWTest_Report_Results() __attribute__ ((destructor));
+
+static void DEWTest_Report_Results()
 {
-	printf("Results: %d / %d passed\n", __dewtest_passed_tests, __dewtest_total_tests);
+	printf("Test Results: %d / %d passed\n", __dewtest_passed_tests, __dewtest_total_tests);
 }
 
+#endif /* DEWTEST_OFF */
 
 /*****************************
  * Undefine internal macros
@@ -169,5 +192,10 @@ void DEWTest_Report_Results()
 
 #undef __DEWTEST_READ_FAIL
 #undef __DEWTEST_READ_SUCCESS
+#undef __DEWTEST_RED_BG
+#undef __DEWTEST_GREEN_BG
+#undef __DEWTEST_RED_FG
+#undef __DEWTEST_GREEN_FG
+#undef __DEWTEST_BLUE_FG
 
 #endif  /* __DEWTEST_INCLUDED */

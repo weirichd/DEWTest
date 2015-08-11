@@ -1,9 +1,10 @@
-all: dewtest test
+all: dewtest test_result.txt
 
-dewtest: dewtest.c dewtest.h
+dewtest: dewtest.c dewtest.h Makefile
 	gcc -Wall dewtest.c -o dewtest
 
-test: dewtest
+test_result.txt: dewtest
+	./dewtest > test_result.txt
 	./dewtest
 
 clean:
