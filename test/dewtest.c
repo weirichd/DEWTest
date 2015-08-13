@@ -33,8 +33,15 @@ int main()
 	DEW_assert_not_equal(5.2f, 15.2f, "%f");
 	DEW_assert_not_equal(15.2f, 15.2f, "%f");
 
+	// Default value for epsilon
 	DEW_assert_close(2.0f, 2.00001f, "%f");
-	DEW_assert_close(2.0f, 200.0f, "%f");
+	DEW_assert_close(2.0f, 2.5f, "%f");
+
+	// Or refdefine it
+	#undef DEWTEST_EPSILON
+	#define DEWTEST_EPSILON 1.0f
+
+	DEW_assert_close(2.0f, 2.5f, "%f");
 
 	return 0;
 }
