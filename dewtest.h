@@ -30,6 +30,7 @@
 
 #include <stdio.h> // for printf
 #include <ctype.h> // for isspace
+#include <stdarg.h> // for va_list, va_start, va_end
 
 /*******************
  *  Color Defines
@@ -57,6 +58,19 @@
 
 #define __DEWTEST_PASS __DEWTEST_GREEN_BG([ Pass ])
 #define __DEWTEST_FAIL __DEWTEST_RED_BG([ Fail ])
+
+/**************************
+ * Other Internal Macros
+ **************************/
+
+/* Feel free to change this value before including dewtest.h */
+#ifndef DEWTEST_EPSILON
+#define DEWTEST_EPSILON 0.01f
+#endif
+
+/* Check that two values are closer than DEWTEST_EPSILON */
+#define __DEWTEST_EPSILON_CLOSE(value1, value2) \
+	((value1 - value2) < DEWTEST_EPSILON && (value2 - value1) < DEWTEST_EPSILON)
 
 /************************
  *  Source Code Output
@@ -108,25 +122,38 @@ static int __DEWTest_Print_Source_Line(char *filename, int line_number)
 
 #ifndef DEWTEST_OFF
 
+/* Fail when true_thing evaluates to false */
 #define DEW_assert_true(true_thing) \
 	__DEWTest_Assert(true_thing, __FILE__, __LINE__, \
-	"Expected true, but recieved '"#true_thing"'")
+	"Assert True Failed: %d\n", true_thing)
+
+/* Fail when false_thing evaluates to true */
 #define DEW_assert_false(false_thing) \
 	__DEWTest_Assert(!false_thing, __FILE__, __LINE__, \
-	"Expected false, but recieved '"#false_thing"'")
-#define DEW_assert_equal(equal_thing1, equal_thing2) \
-	__DEWTest_Assert(equal_thing1 == equal_thing2, __FILE__, __LINE__, \
-	"Expected that '"#equal_thing1" == "#equal_thing2"'");				
+	"Assert False Failed: %d\n", false_thing)
 
-#define DEW_assert_not_equal(not_equal_thing1, not_equal_thing2) \
+/* Fail when equal_thing1 != equal_thing2 */
+#define DEW_assert_equal(equal_thing1, equal_thing2, format_string) \
+	__DEWTest_Assert(equal_thing1 == equal_thing2, __FILE__, __LINE__, \
+	"Assert Equal Failed: "format_string" != "format_string"\n", equal_thing1, equal_thing2);				
+
+/* Fail when not_equal_thing1 == not_equal_thing2 */
+#define DEW_assert_not_equal(not_equal_thing1, not_equal_thing2, format_string) \
 	__DEWTest_Assert(not_equal_thing1 != not_equal_thing2, __FILE__, __LINE__, \
-	"Expected that '"#not_equal_thing1" != "#not_equal_thing2"'");				
+	"Assert Not Equal Failed: "format_string" == "format_string"\n", not_equal_thing1, not_equal_thing2);				
+
+/* Fail when close_thing1 isn't epsilon close to close_thing2 */
+#define DEW_assert_close(close_thing1, close_thing2, format_string) \
+	__DEWTest_Assert(__DEWTEST_EPSILON_CLOSE(close_thing1, close_thing2), __FILE__, __LINE__, \
+	"Assert Close Failed: |"format_string" - "format_string"| >= %f\n", close_thing1, close_thing2, DEWTEST_EPSILON);
+
 #else
 
+// Define these to be blank if they aren't being used
 #define DEW_assert_true(true_thing) 
 #define DEW_assert_false(false_thing) 
-#define DEW_assert_equal(equal_thing1, equal_thing2) 
-#define DEW_assert_not_equal(not_equal_thing1, not_equal_thing2) 
+#define DEW_assert_equal(equal_thing1, equal_thing2, format_string) 
+#define DEW_assert_not_equal(not_equal_thing1, not_equal_thing2, format_string) 
 
 #endif /* DEWTEST_OFF */
 
@@ -140,11 +167,12 @@ static int __dewtest_total_tests = 0;
 static void __DEWTest_Assert(int thing_to_be_tested,
 					char *filename,
 					int line, 
-					char *fail_message)
+					char *fail_message,
+					...)
 {
 	if(__dewtest_total_tests == 0)
 	{
-		printf("FILE: "__DEWTEST_BLUE_FG(%s)"\n", filename);
+		printf("TEST FILE: "__DEWTEST_BLUE_FG(%s)"\n", filename);
 	}
 
 	__dewtest_total_tests++;
@@ -159,7 +187,12 @@ static void __DEWTest_Assert(int thing_to_be_tested,
 	else
 	{
 		printf(__DEWTEST_FAIL"\n");
-		printf("%s\n", fail_message);
+
+		va_list args;
+		va_start(args, fail_message);
+		vprintf(fail_message, args);
+		va_end(args);
+
 		int _dew_print_source = __DEWTest_Print_Source_Line(filename, line);
 		if(_dew_print_source == __DEWTEST_READ_FAIL)
 		{
@@ -181,7 +214,16 @@ static void DEWTest_Report_Results() __attribute__ ((destructor));
 
 static void DEWTest_Report_Results()
 {
-	printf("Test Results: %d / %d passed\n", __dewtest_passed_tests, __dewtest_total_tests);
+	if(__dewtest_passed_tests == __dewtest_total_tests)
+	{
+		printf("Test Results: "__DEWTEST_GREEN_FG(%d / %d)" passed\n",
+				__dewtest_passed_tests, __dewtest_total_tests);
+	}
+	else
+	{
+		printf("Test Results: "__DEWTEST_RED_FG(%d / %d)" passed\n",
+				__dewtest_passed_tests, __dewtest_total_tests);
+	}
 }
 
 #endif /* DEWTEST_OFF */

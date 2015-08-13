@@ -1,1 +1,3 @@
 DEWTest is a _very_ small testing library for C. It consists of a single header file.  I wrote this for personal use, and as an educational exercise.
+
+compile with -DDEWTEST_OFF to disable everything

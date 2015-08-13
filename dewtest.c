@@ -1,3 +1,11 @@
+/*
+ * dewtest.c
+ */
+
+/*
+ * This is a simple example of a test using DEWTest.
+ */
+
 #include "dewtest.h"
 
 int mul(int a, int b)
@@ -10,19 +18,23 @@ int main()
 	DEW_assert_true(1);
 	DEW_assert_true(0); // This should fail
 	DEW_assert_false(0);
-	DEW_assert_false(1); // This too
-
-	DEW_assert_true(mul(3,4) == 12);
-	DEW_assert_true(mul(3,4) == 2);
-
-	DEW_assert_equal(3, 3);
-	DEW_assert_equal(3, 5);
-	DEW_assert_not_equal(5.2f, 15.2f);
-	DEW_assert_not_equal(15.2f, 15.2f);
-
-	int x = 0;
-
+	DEW_assert_false(10); // This too
+	int x = 1;
 	DEW_assert_true(x);
+
+	// It works for complicated stuff like this too!
+	DEW_assert_true(mul(3,4) == 12);
+	DEW_assert_true(mul(3,4) != 2);
+
+	// For assert equals, you need to pass a format string
+	// for it to use while printing the error
+	DEW_assert_equal(3, 3, "%d");
+	DEW_assert_equal(3, 5, "%d");
+	DEW_assert_not_equal(5.2f, 15.2f, "%f");
+	DEW_assert_not_equal(15.2f, 15.2f, "%f");
+
+	DEW_assert_close(2.0f, 2.00001f, "%f");
+	DEW_assert_close(2.0f, 200.0f, "%f");
 
 	return 0;
 }

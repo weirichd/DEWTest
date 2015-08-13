@@ -9,3 +9,4 @@ test_result.txt: dewtest
 
 clean:
 	rm dewtest
+	rm test_result.txt
