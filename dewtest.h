@@ -28,9 +28,10 @@
 #ifndef __DEWTEST_INCLUDED
 #define __DEWTEST_INCLUDED
 
-#include <stdio.h> // for printf
-#include <ctype.h> // for isspace
-#include <stdarg.h> // for va_list, va_start, va_end
+#include <stdio.h>  // printf
+#include <ctype.h>  // isspace
+#include <stdarg.h> // va_list, va_start, va_end
+#include <string.h> // strstr
 
 /*******************
  *  Color Defines
@@ -63,6 +64,9 @@
  * Other Internal Macros
  **************************/
 
+/* Print out a carrot at a specified position */
+#define __DEWTEST_PRINT_CARROT(n) printf("%*s ^\n", n, " ")
+
 /* Feel free to change this value before including dewtest.h */
 #ifndef DEWTEST_EPSILON
 #define DEWTEST_EPSILON 0.01f
@@ -93,6 +97,7 @@ static char *__DEWTest_Remove_Leading_Whitespaces(char *string)
 	return string_without_whitespaces;
 }
 
+
 static int __DEWTest_Print_Source_Line(char *filename, int line_number)
 {
 	FILE *fh = fopen(filename, "r");
@@ -111,7 +116,13 @@ static int __DEWTest_Print_Source_Line(char *filename, int line_number)
 
 	fclose(fh);
 
-	printf("%s:%d:1: %s", filename, line_number, __DEWTest_Remove_Leading_Whitespaces(buffer));
+	char error_code[256];
+	snprintf(error_code, 256, "%s:%d:1: %s", filename, line_number, __DEWTest_Remove_Leading_Whitespaces(buffer));
+	printf("%s", error_code);
+
+	char *carrot_pos = strstr(error_code, "(");
+
+	__DEWTEST_PRINT_CARROT((int)(error_code - carrot_pos));
 
 	return __DEWTEST_READ_SUCCESS;
 }
@@ -209,8 +220,10 @@ static void __DEWTest_Assert(int thing_to_be_tested,
 
 #ifndef DEWTEST_OFF
 
-// This only works in GCC.  If you are using something else this will (probably) cause an error
+#ifdef __GNUC__
+/* If you are using gcc, this will output the results automatically */
 static void DEWTest_Report_Results() __attribute__ ((destructor));
+#endif
 
 static void DEWTest_Report_Results()
 {
@@ -234,6 +247,7 @@ static void DEWTest_Report_Results()
 
 #undef __DEWTEST_READ_FAIL
 #undef __DEWTEST_READ_SUCCESS
+#undef __DEWTEST_PRINT_CARROT
 #undef __DEWTEST_RED_BG
 #undef __DEWTEST_GREEN_BG
 #undef __DEWTEST_RED_FG
