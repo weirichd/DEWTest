@@ -28,6 +28,8 @@
 #ifndef __DEWTEST_INCLUDED
 #define __DEWTEST_INCLUDED
 
+#ifndef DEWTEST_OFF
+
 #include <stdio.h>  // printf
 #include <ctype.h>  // isspace
 #include <stdarg.h> // va_list, va_start, va_end
@@ -71,6 +73,9 @@
 #ifndef DEWTEST_EPSILON
 #define DEWTEST_EPSILON 0.01f
 #endif
+
+#define __DEWTEST_TRUE 1
+#define __DEWTEST_FALSE 0
 
 /* Check that two values are closer than DEWTEST_EPSILON */
 #define __DEWTEST_EPSILON_CLOSE(value1, value2) \
@@ -131,7 +136,6 @@ static int __DEWTest_Print_Source_Line(char *filename, int line_number)
  *  Assert Macros
  *******************/
 
-#ifndef DEWTEST_OFF
 
 /* Fail when true_thing evaluates to false */
 #define DEW_assert_true(true_thing) \
@@ -158,15 +162,19 @@ static int __DEWTest_Print_Source_Line(char *filename, int line_number)
 	__DEWTest_Assert(__DEWTEST_EPSILON_CLOSE(close_thing1, close_thing2), __FILE__, __LINE__, \
 	"Assert Close Failed: |"format_string" - "format_string"| >= %f\n", close_thing1, close_thing2, DEWTEST_EPSILON);
 
-#else
+/************************
+ * Being/End Functions
+ ************************/
 
-// Define these to be blank if they aren't being used
-#define DEW_assert_true(true_thing) 
-#define DEW_assert_false(false_thing) 
-#define DEW_assert_equal(equal_thing1, equal_thing2, format_string) 
-#define DEW_assert_not_equal(not_equal_thing1, not_equal_thing2, format_string) 
+static void __DEWTest_Begin()
+{
+	
+}
 
-#endif /* DEWTEST_OFF */
+static void __DEWTest_End()
+{
+
+}
 
 /*********************
  *  Assert Function
@@ -218,8 +226,6 @@ static void __DEWTest_Assert(int thing_to_be_tested,
  * Report Results
  *******************/
 
-#ifndef DEWTEST_OFF
-
 #ifdef __GNUC__
 /* If you are using gcc, this will output the results automatically */
 static void DEWTest_Report_Results() __attribute__ ((destructor));
@@ -239,6 +245,16 @@ static void DEWTest_Report_Results()
 	}
 }
 
+
+#else
+
+// Define these to be blank if they aren't being used
+#define DEW_assert_true(true_thing) 
+#define DEW_assert_false(false_thing) 
+#define DEW_assert_equal(equal_thing1, equal_thing2, format_string) 
+#define DEW_assert_not_equal(not_equal_thing1, not_equal_thing2, format_string) 
+#define DEW_assert_close(close_thing1, close_thing2, format_string) 
+
 #endif /* DEWTEST_OFF */
 
 /*****************************
@@ -253,5 +269,7 @@ static void DEWTest_Report_Results()
 #undef __DEWTEST_RED_FG
 #undef __DEWTEST_GREEN_FG
 #undef __DEWTEST_BLUE_FG
+#undef __DEWTEST_TRUE 
+#undef __DEWTEST_FALSE 
 
 #endif  /* __DEWTEST_INCLUDED */

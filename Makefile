@@ -4,8 +4,8 @@ TEST_RESULTS=$(TESTS:.c=_result.txt)
 
 all: $(TEST_RESULTS)
 
-test/%test: test/%test.c
-	gcc -Wall $< -o $@
+test/%test: test/%test.c test/dewtest.h
+	gcc -Wall $< -o $@ -DDEWTEST_OFF
 
 test/%test_result.txt: test/%test
 	./$< > $@

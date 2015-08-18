@@ -19,6 +19,7 @@ int main()
 	DEW_assert_true(0); // This should fail
 	DEW_assert_false(0);
 	DEW_assert_false(10); // This too
+
 	int x = 1;
 	DEW_assert_true(x);
 
